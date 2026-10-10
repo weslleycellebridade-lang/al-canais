@@ -1,3 +1,4 @@
+
 name: Gerar APK
 
 on:
@@ -9,6 +10,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v4
         with:
@@ -21,7 +24,9 @@ jobs:
 
       - name: Extrair projeto
         run: |
-          unzip -q ./*.zip -d projeto
+          ZIP=$(git log --diff-filter=AM --name-only --pretty=format: -- '*.zip' | grep -v '^$' | head -n 1)
+          echo "Usando: $ZIP"
+          unzip -q "$ZIP" -d projeto
           GRADLEW=$(find projeto -name gradlew | head -n 1)
           echo "PROJ=$(dirname "$GRADLEW")" >> $GITHUB_ENV
 
