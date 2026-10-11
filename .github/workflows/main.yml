@@ -1,5 +1,5 @@
 
-name: Gerar APK AL Canais V4
+name: Gerar APK AL Canais V5
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Baixar repositório
+      - name: Baixar repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Java
@@ -26,12 +26,12 @@ jobs:
         with:
           packages: ''
 
-      - name: Extrair projeto V4
+      - name: Extrair projeto V5
         run: |
-          ZIP="AL_Canais_V4_Biblioteca_TV.zip"
+          ZIP="AL_Canais_V5_Categorias_Separadas.zip"
 
           if [ ! -f "$ZIP" ]; then
-            echo "ERRO: Arquivo V4 não encontrado!"
+            echo "ERRO: Arquivo V5 nao encontrado!"
             exit 1
           fi
 
@@ -43,21 +43,21 @@ jobs:
           GRADLEW=$(find projeto -name gradlew -type f | head -n 1)
 
           if [ -z "$GRADLEW" ]; then
-            echo "ERRO: Projeto Gradle não encontrado!"
+            echo "ERRO: Projeto Gradle nao encontrado!"
             exit 1
           fi
 
           echo "PROJ=$(dirname "$GRADLEW")" >> "$GITHUB_ENV"
 
-      - name: Compilar APK
+      - name: Compilar APK V5
         run: |
           cd "$PROJ"
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Publicar APK
+      - name: Publicar APK V5
         uses: actions/upload-artifact@v4
         with:
-          name: AL-Canais-V4-APK
+          name: AL-Canais-V5-APK
           path: ${{ env.PROJ }}/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
