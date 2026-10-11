@@ -1,34 +1,53 @@
 
-name: Gerar APK
+name: Gerar APK AL Canais V4
 
 on:
   push:
+    branches:
+      - teste-melhorias-v1
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '25'
 
-      - uses: android-actions/setup-android@v3
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
         with:
           packages: ''
 
-      - name: Extrair projeto
+      - name: Extrair projeto V4
         run: |
-          ZIP=$(git log --diff-filter=AM --name-only --pretty=format: -- '*.zip' | grep -v '^$' | head -n 1)
-          echo "Usando: $ZIP"
+          ZIP="AL_Canais_V4_Biblioteca_TV.zip"
+
+          if [ ! -f "$ZIP" ]; then
+            echo "ERRO: Arquivo V4 não encontrado!"
+            exit 1
+          fi
+
+          echo "Compilando: $ZIP"
+
+          mkdir -p projeto
           unzip -q "$ZIP" -d projeto
-          GRADLEW=$(find projeto -name gradlew | head -n 1)
-          echo "PROJ=$(dirname "$GRADLEW")" >> $GITHUB_ENV
+
+          GRADLEW=$(find projeto -name gradlew -type f | head -n 1)
+
+          if [ -z "$GRADLEW" ]; then
+            echo "ERRO: Projeto Gradle não encontrado!"
+            exit 1
+          fi
+
+          echo "PROJ=$(dirname "$GRADLEW")" >> "$GITHUB_ENV"
 
       - name: Compilar APK
         run: |
@@ -36,7 +55,9 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - uses: actions/upload-artifact@v4
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
         with:
-          name: AL-Canais-APK
+          name: AL-Canais-V4-APK
           path: ${{ env.PROJ }}/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
